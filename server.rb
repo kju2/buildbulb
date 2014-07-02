@@ -63,7 +63,7 @@ def update_light(light, status)
 end
 
 loop do
-    puts 'Check for office hours...'
+    puts "#{Time.now}: Check for office hours..."
     #if light.on? && !office_hours
         #puts 'Office hours are over, turn off the lights...'
         #light.turn_off!
@@ -74,38 +74,38 @@ loop do
         #light.turn_on!
     #end
 
-    severity = 0
-    puts "Check socket for new input..."
-    readable, _, _ = IO.select([connection], [connection], nil, 10)
+    puts "#{Time.now}: Check socket for new input..."
+    readable, _, _ = IO.select([connection], [connection], nil, 60)
     if readable != nil
-        puts "Parsing message..."
+        puts "#{Time.now}: Parsing message..."
         sock = connection.accept
         buff = ""
         while line = sock.gets
             buff << line
         end
+        #puts "#{Time.now}: #{buff}"
         x = JSON.parse(buff)
-        puts x["name"]
-        puts x["build"]["status"]
         project_name = x["name"]
         if projects.has_key?(project_name)
+            puts "#{Time.now}: project \"#{project_name}\" status was \"#{projects[project_name][:actual_status]}\" and now it is \"#{x["build"]["status"]}\""
             projects[project_name][:actual_status] = x["build"]["status"]
         end
         sock.close
     end
     
+    puts "#{Time.now}: Determine new lamp status..."
     lamp_status = success
     projects.each do |project, status| 
         if status[:expected_status] != status[:actual_status] 
             if status[:actual_status] == broken
+                puts "#{Time.now}: project \"#{project}\" caused status: \"#{broken}\""
                 lamp_status = broken
             elsif status[:actual_status] == unstable && lamp_status != broken
+                puts "#{Time.now}: project \"#{project}\" caused status: \"#{unstable}\""
                 lamp_status = unstable
             end
         end
     end
-
-    puts "#{Time.now}:  #{lamp_status}."
 
     #update_light(light, lamp_status)
 end
