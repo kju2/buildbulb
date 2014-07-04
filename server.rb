@@ -3,18 +3,18 @@ require 'socket'
 require 'json'
 
 label = ARGV[0]
-label = 'BuildOrb001'
+label = 'BBEBB'
 
 address = '0.0.0.0'
 port = 4712
 
-success = "SUCCESS"
-unstable = "UNSTABLE"
-broken = "BROKEN"
-unkown = broken
+SUCCESS = "SUCCESS"
+UNSTABLE = "UNSTABLE"
+BROKEN = "BROKEN"
+UNKOWN = BROKEN
 
-projects = {"notification-plugin" => {:expected_status => success, :actual_status => unkown},
-            "test" => {:expected_status => unstable, :actual_status => unkown}}
+projects = {"notification-plugin" => {:expected_status => SUCCESS, :actual_status => UNKOWN},
+            "test" => {:expected_status => UNSTABLE, :actual_status => UNKOWN}}
 
 lifx = LIFX::Client.lan
 lifx.discover! do |c|
@@ -22,8 +22,8 @@ lifx.discover! do |c|
 end
 
 
-light = if lifx.tags.include?('BuildOrb001')
-  lights = lifx.lights.with_tag('BuildOrb001')
+LIGHT = if lifx.tags.include?(label)
+  lights = lifx.lights.with_tag(label)
   if lights.empty?
     puts "No lights in the Build Light tag, using the first light found."
     lifx.lights.first
@@ -34,7 +34,7 @@ else
   lifx.lights.first
 end
 
-if !light
+if !LIGHT
   puts "No LIFX lights found."
   exit 1
 end
@@ -51,11 +51,11 @@ connection = TCPServer.new(address, port)
 
 def update_light(light, status)
     color = case status
-    when success
+    when SUCCESS
         LIFX::Color.hsb(120, 1, 1)  
-    when unstable
+    when UNSTABLE
         LIFX::Color.hsb(60, 1, 1)  
-    when broken
+    when BROKEN
         LIFX::Color.hsb(0, 1, 1)
     end
 
@@ -64,14 +64,14 @@ end
 
 loop do
     puts "#{Time.now}: Check for office hours..."
-    if light.on? && !office_hours
+    if LIGHT.on? && !office_hours
         puts 'Office hours are over, turn off the lights...'
-        light.turn_off!
+        LIGHT.turn_off!
     end
 
-    if light.off? && office_hours
+    if LIGHT.off? && office_hours
         puts 'Time to work, turn on the lights...'
-        light.turn_on!
+        LIGHT.turn_on!
     end
 
     puts "#{Time.now}: Check socket for new input..."
@@ -94,48 +94,18 @@ loop do
     end
     
     puts "#{Time.now}: Determine new lamp status..."
-    lamp_status = success
+    lamp_status = SUCCESS
     projects.each do |project, status| 
         if status[:expected_status] != status[:actual_status] 
-            if status[:actual_status] == broken
-                puts "#{Time.now}: project \"#{project}\" caused status: \"#{broken}\""
-                lamp_status = broken
-            elsif status[:actual_status] == unstable && lamp_status != broken
-                puts "#{Time.now}: project \"#{project}\" caused status: \"#{unstable}\""
-                lamp_status = unstable
+            if status[:actual_status] == BROKEN
+                puts "#{Time.now}: project \"#{project}\" caused status: \"#{BROKEN}\""
+                lamp_status = BROKEN
+            elsif status[:actual_status] == UNSTABLE && lamp_status != BROKEN
+                puts "#{Time.now}: project \"#{project}\" caused status: \"#{UNSTABLE}\""
+                lamp_status = UNSTABLE
             end
         end
     end
 
-    #update_light(light, lamp_status)
+    update_light(LIGHT, lamp_status)
 end
-
-
-#puts "Using light(s): #{light}"
-#repo_path = ARGV.first || 'rails/rails'
-
-#repo = Travis::Repository.find(repo_path)
-#puts "Watching repository #{repo.slug}"
-
-#def update_light(light, repository)
-  #color = case repository.color
-  #when 'green'
-    #LIFX::Color.hsb(120, 1, 1)  
-  #when 'yellow'
-    #LIFX::Color.hsb(60, 1, 1)  
-  #when 'red'
-    #LIFX::Color.hsb(0, 1, 1)
-  #end
-
-  #light.turn_on!
-  #light.set_color(color, duration: 0.2)
-  #puts "#{Time.now}: Build ##{repository.last_build.number} is #{repository.color}."
-#end
-
-#update_light(light, repo)
-
-#Travis.listen(repo) do |stream|
-  #stream.on('build:started', 'build:finished') do |event|
-    #update_light(light, event.repository)
-  #end
-#end
