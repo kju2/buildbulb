@@ -6,7 +6,7 @@ label = ARGV[0]
 label = 'BuildOrb001'
 
 address = '0.0.0.0'
-port = 8083
+port = 4712
 
 success = "SUCCESS"
 unstable = "UNSTABLE"
