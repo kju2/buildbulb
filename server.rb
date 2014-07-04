@@ -16,28 +16,28 @@ unkown = broken
 projects = {"notification-plugin" => {:expected_status => success, :actual_status => unkown},
             "test" => {:expected_status => unstable, :actual_status => unkown}}
 
-#lifx = LIFX::Client.lan
-#lifx.discover! do |c|
-    #c.lights.with_label(label)
-#end
+lifx = LIFX::Client.lan
+lifx.discover! do |c|
+    c.lights.with_label(label)
+end
 
 
-#light = if lifx.tags.include?('BuildOrb001')
-  #lights = lifx.lights.with_tag('BuildOrb001')
-  #if lights.empty?
-    #puts "No lights in the Build Light tag, using the first light found."
-    #lifx.lights.first
-  #else
-    #lights
-  #end
-#else
-  #lifx.lights.first
-#end
+light = if lifx.tags.include?('BuildOrb001')
+  lights = lifx.lights.with_tag('BuildOrb001')
+  if lights.empty?
+    puts "No lights in the Build Light tag, using the first light found."
+    lifx.lights.first
+  else
+    lights
+  end
+else
+  lifx.lights.first
+end
 
-#if !light
-  #puts "No LIFX lights found."
-  #exit 1
-#end
+if !light
+  puts "No LIFX lights found."
+  exit 1
+end
 
 def office_hours
     morning_light_on = 6
@@ -64,15 +64,15 @@ end
 
 loop do
     puts "#{Time.now}: Check for office hours..."
-    #if light.on? && !office_hours
-        #puts 'Office hours are over, turn off the lights...'
-        #light.turn_off!
-    #end
+    if light.on? && !office_hours
+        puts 'Office hours are over, turn off the lights...'
+        light.turn_off!
+    end
 
-    #if light.off? && office_hours
-        #puts 'Time to work, turn on the lights...'
-        #light.turn_on!
-    #end
+    if light.off? && office_hours
+        puts 'Time to work, turn on the lights...'
+        light.turn_on!
+    end
 
     puts "#{Time.now}: Check socket for new input..."
     readable, _, _ = IO.select([connection], [connection], nil, 60)
@@ -139,4 +139,3 @@ end
     #update_light(light, event.repository)
   #end
 #end
-
