@@ -2,8 +2,9 @@ require 'socket'
 
 project = ARGV[0]
 status = ARGV[1]
+port = ARGV[2] ? ARGV[2] : 4712
 
-sock = TCPSocket.new('127.0.0.1', 8083)
+socket = TCPSocket.new('127.0.0.1', port)
 data = <<eos
 {
     "name": "#{project}",
@@ -30,5 +31,5 @@ data = <<eos
     }
 }
 eos
-sock.write data
-sock.close
+socket.write data
+socket.close
