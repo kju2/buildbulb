@@ -5,9 +5,9 @@ module BuildOrb
     class Color
 
         GREEN = LIFX::Color.hsb(120, 1, 0.5)
-        ORANGE = LIFX::Color.hsb(25, 1, 0.5)
+        ORANGE = LIFX::Color.hsb(30, 1, 0.5)
         RED = LIFX::Color.hsb(0, 1, 0.5)
-        YELLOW = LIFX::Color.hsb(50, 1, 0.5)
+        YELLOW = LIFX::Color.hsb(70, 1, 0.5)
 
     end
 
