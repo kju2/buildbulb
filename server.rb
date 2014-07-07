@@ -7,7 +7,7 @@ require './project'
 
 module BuildOrb
 
-    DEBUG = true
+    DEBUG = false
     PORT = 0
     NAME = 1
     PROJECTS = 2
