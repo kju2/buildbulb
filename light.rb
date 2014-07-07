@@ -4,10 +4,10 @@ module BuildOrb
 
     class Color
 
-        GREEN = LIFX::Color.hsb(120, 1, 1)
-        ORANGE = LIFX::Color.hsb(60, 1, 1) # TODO find orange
-        RED = LIFX::Color.hsb(0, 1, 1)
-        YELLOW = LIFX::Color.hsb(60, 1, 1) # TODO ask colleagues which one the want
+        GREEN = LIFX::Color.hsb(120, 1, 0.5)
+        ORANGE = LIFX::Color.hsb(25, 1, 0.5)
+        RED = LIFX::Color.hsb(0, 1, 0.5)
+        YELLOW = LIFX::Color.hsb(50, 1, 0.5)
 
     end
 
