@@ -44,8 +44,9 @@ module BuildOrb
 
                 msg =  JSON.parse(msg)
                 project = projects[msg["name"]]
-                if project
-                    project.actual_status = Status[msg["build"]["status"]]
+                status = msg["build"]["status"]
+                if project && status
+                    project.actual_status = Status[status]
                 end
             end
             
