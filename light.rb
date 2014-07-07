@@ -60,6 +60,7 @@ module BuildOrb
         if debug
             return BuildOrb::FakeLight.new(id)
         else
+            LIFX::Config.logger.level = Logger::DEBUG
             lifx = LIFX::Client.lan
             lifx.discover! do |c|
                 c.lights.with_label(id)
