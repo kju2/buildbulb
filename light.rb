@@ -65,7 +65,7 @@ module BuildOrb
                 c.lights.with_label(id)
             end
 
-            return c.lights.with_label(id)
+            return lifx.lights.with_label(id)
         end
     end
 
