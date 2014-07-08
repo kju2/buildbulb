@@ -12,7 +12,7 @@ module BuildOrb
     NAME = 1
     PROJECTS = 2
 
-    OFFICE_HOURS = 6..17
+    OFFICE_HOURS = 6..16
 
     LOGGER = Logger.new(STDOUT)
 
