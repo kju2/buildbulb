@@ -95,7 +95,7 @@ module BuildOrb
             @status.fetch(key)
         end
 
-        Status.add_item(:BROKEN, 0, Color::RED)
+        Status.add_item(:FAILURE, 0, Color::RED)
         Status.add_item(:UNKNOWN, 1, Color::ORANGE)
         Status.add_item(:UNSTABLE, 2, Color::YELLOW)
         Status.add_item(:SUCCESS, 3, Color::GREEN)
