@@ -1,11 +1,12 @@
+#!/usr/bin/env ruby
+
 require 'json'
 require 'logger'
 require 'socket'
 
-require './light'
-require './project'
+require 'build-bulb'
 
-module BuildOrb
+module BuildBulb
 
     DEBUG = false
     PORT = 0
@@ -79,5 +80,5 @@ module BuildOrb
     end
 end
 
-include BuildOrb
-BuildOrb::main
+include BuildBulb
+BuildBulb::main

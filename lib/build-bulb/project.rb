@@ -1,4 +1,4 @@
-module BuildOrb
+module BuildBulb
 
     class Project
 
@@ -10,19 +10,21 @@ module BuildOrb
         end
 
         def actual_status
-            if @last_updated < (Time.now - 2 * 24 * 3600).to_i
-                @actual_status = Status::UNKNOWN
-            end
             return @actual_status
         end
 
         def actual_status=(status)
             @actual_status = status
-            @last_updated = Time.now.to_i
+            if @last_updated > 0
+                @last_updated = Time.now.to_i
+            end
             LOGGER.info("#{@id} now has status #{@actual_status.name}.")
         end
 
         def status
+            if 0 < @last_updated && @last_updated < (Time.now - 2 * 24 * 3600).to_i
+                @actual_status = Status::UNKNOWN
+            end
             if self.actual_status == @expected_status
                 Status::SUCCESS
             else

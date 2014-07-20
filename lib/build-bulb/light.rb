@@ -1,6 +1,6 @@
 require 'lifx'
 
-module BuildOrb
+module BuildBulb
 
     class Color
 
@@ -58,7 +58,7 @@ module BuildOrb
 
     def get_light(id, debug: false)
         if debug
-            return BuildOrb::FakeLight.new(id)
+            return BuildBulb::FakeLight.new(id)
         else
             #LIFX::Config.logger.level = Logger::DEBUG
             lifx = LIFX::Client.lan
