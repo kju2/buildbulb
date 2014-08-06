@@ -56,17 +56,19 @@ module BuildBulb
 
     end
 
-    def get_light(id, debug: false)
-        if debug
-            return BuildBulb::FakeLight.new(id)
-        else
-            #LIFX::Config.logger.level = Logger::DEBUG
-            lifx = LIFX::Client.lan
-            lifx.discover! do |c|
-                c.lights.with_label(id)
-            end
+    module Light
+        def self.get_light(id, debug: false)
+            if debug
+                return BuildBulb::FakeLight.new(id)
+            else
+                #LIFX::Config.logger.level = Logger::DEBUG
+                lifx = LIFX::Client.lan
+                lifx.discover! do |c|
+                    c.lights.with_label(id)
+                end
 
-            return lifx.lights.with_label(id)
+                return lifx.lights.with_label(id)
+            end
         end
     end
 

@@ -5,7 +5,7 @@ Gem::Specification.new do |spec|
     spec.summary = "Let a LIFX lamp display the current status of jenkins projects."
     spec.authors = ["Kju2"]
     spec.required_ruby_version = ">= 2.0"
-    spec.files = ["lib/build-bulb.rb", "lib/build-bulb/light.rb", "lib/build-bulb/project.rb"]
+    spec.files = ["lib/build-bulb.rb", "lib/build-bulb/light.rb", "lib/build-bulb/project.rb", "lib/build-bulb/server.rb"]
     spec.executables = ["build-bulb", "client"]
 
     spec.add_runtime_dependency "lifx", "~> 0.4"

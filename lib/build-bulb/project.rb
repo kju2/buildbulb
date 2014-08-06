@@ -9,6 +9,10 @@ module BuildBulb
             @last_updated = last_updated ? last_updated : 0
         end
 
+        def id
+            return @id
+        end
+
         def actual_status
             return @actual_status
         end
@@ -18,7 +22,6 @@ module BuildBulb
             if @last_updated > 0
                 @last_updated = Time.now.to_i
             end
-            LOGGER.info("#{@id} now has status #{@actual_status.name}.")
         end
 
         def status
@@ -32,15 +35,18 @@ module BuildBulb
             end
         end
 
+        def to_json
+            return {:id => @id, :expected_status => @expected_status.name, :actual_status => @actual_status.name, :last_updated => @last_updated}
+        end
+
     end
 
     class Projects
 
-        def initialize(projects)
-            @projects = {}
-            projects.each do |id, status|
-                @projects[id] = Project.new(id, status["expected_status"], status["actual_status"], status["last_updated"])
-            end
+        def initialize(projects={}, marshaller=nil)
+            @marshaller = marshaller ? marshaller : Ignore.new
+            #@projects = marshaller ? marshaller.load() : projects
+            @projects = projects
         end
 
         def [](key)
@@ -62,8 +68,55 @@ module BuildBulb
             combined_status
         end
 
+        def update(project, status)
+            status = Status[status]
+
+            if !@projects.has_key?(project)
+                raise KeyError, "Project \"#{project}\" not found."
+            end
+            @projects[project].actual_status = status
+            @marshaller.dump(@projects)
+        end
     end
     
+    class ProjectsFileMarshaller
+    
+        def initialize(filename=nil, logger=nil)
+            @filename = filename
+            @logger = logger ? logger : Ignore.new
+        end
+
+        def load
+            projects = {}
+
+            if !@filename
+                return projects
+            end
+
+            begin
+                json = JSON.parse(File.read(@filename))
+
+                json.each do |project|
+                    projects[project["id"]] = Project.new(project["id"], project["expected_status"], project["actual_status"], project["last_updated"])
+                end
+            rescue Exception => e
+                @logger.warn(e.message)
+            end
+
+            return projects
+        end
+
+        def dump(projects)
+            objects = []
+
+            projects.each do |id, project|
+                objects.push(project.to_json)
+            end
+
+            File.open(@filename, 'w') { |file_handler| file_handler.puts objects.to_json }
+        end
+    end
+
     class Status
 
         def initialize(name, value, color)
@@ -85,7 +138,10 @@ module BuildBulb
         end
 
         def Status.[](key)
-            @status.fetch(key.to_sym)
+            if !key
+                raise KeyError, "Nil is not a valid status key."
+            end
+            @status.fetch(key.upcase.to_sym)
         end
 
         def Status.add_item(key, value, color)

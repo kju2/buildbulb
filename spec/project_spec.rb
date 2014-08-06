@@ -1,4 +1,5 @@
 require "build-bulb"
+require "json"
 require "pp"
 
 module BuildBulb
@@ -58,6 +59,86 @@ module BuildBulb
                     expect(project.status).to eq(Status::UNKNOWN)
                 end
             end
+        end
+    end
+
+    RSpec.describe Projects do
+        describe "#update" do
+
+            project = Project.new("existing project", "success", "unknown", 0)
+            projects = Projects.new({project.id => project})
+
+            it "when the project is nil then raise an exception." do
+                expect{projects.update(nil, "success")}.to raise_error(KeyError, "Project \"\" not found.")
+            end
+
+            it "when the project is unknown then raise an exception." do
+                expect{projects.update("not_existing", "success")}.to raise_error(KeyError, "Project \"not_existing\" not found.")
+            end
+
+            it "when the projects exists, but the status is nil then raise an exception." do
+                expect{projects.update("existing project", nil)}.to raise_error(KeyError)
+            end
+
+            it "when the projects exists, but the status is empty then raise an exception." do
+                expect{projects.update("existing project", "")}.to raise_error(KeyError)
+            end
+
+            it "when the projects exists, but the status is unknown then raise an exception." do
+                expect{projects.update("existing project", "blub")}.to raise_error(KeyError)
+            end
+
+            it "when project and status are valid then update the project status." do
+                projects.update("existing project", "unstable")
+                expect(projects["existing project"].actual_status).to eq(Status::UNSTABLE)
+            end
+        end
+    end
+
+    RSpec.describe ProjectsFileMarshaller do
+        filename = "projects.json"
+        marshaller = ProjectsFileMarshaller.new(filename=filename)
+
+        it "#dump" do
+            project = Project.new("existing project", "success", "unknown", 0)
+
+            marshaller.dump({project.id => project})
+            expect(File.file?(filename)).to be true 
+        end
+
+        it "#load" do
+            expect(File.file?(filename)).to be true
+            expect(marshaller.load).not_to be_empty
+        end
+
+    end
+
+    RSpec.describe Status do
+        describe "#[]" do
+            it "when nil as a status key is given then raise an exception." do
+                expect{Status[""]}.to raise_error(KeyError)
+            end
+
+            it "when an empty status key is given then raise an exception." do
+                expect{Status[""]}.to raise_error(KeyError)
+            end
+            
+            it "when an unknown status key is given then raise an exception." do
+                expect{Status["abort"]}.to raise_error(KeyError)
+            end
+
+            it "when a known status key is given in lower case letters then return the status object." do
+                expect(Status["success"]).to eq(Status::SUCCESS)
+            end
+
+            it "when a known status key is given in mixed case letters then return the status object." do
+                expect(Status["Unknown"]).to eq(Status::UNKNOWN)
+            end
+
+            it "when a known status key is given in upper case letters then return the status object." do
+                expect(Status["FAILURE"]).to eq(Status::FAILURE)
+            end
+
         end
     end
 end
