@@ -8,12 +8,12 @@ module BuildBulb
         TIME_OUT = 600
         OFFICE_HOURS = 6..17
 
-        def initialize(address, port, projects, light, logger)
+        def initialize(logger, address, port, projects, light)
+            @logger = logger
             @address = address
             @port = port
             @projects = projects
             @light = light
-            @logger = logger
         end
 
         def listen_indefinitely()

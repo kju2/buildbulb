@@ -1,30 +1,38 @@
 #!/usr/bin/env ruby
 
-require 'json'
 require 'logger'
-require 'socket'
+require 'thor'
+
 $LOAD_PATH << File.join(File.dirname(__FILE__), "..", "lib")
 
 require 'build-bulb'
 
-DEBUG = true
-PORT = 0
-NAME = 1
-PROJECTS = 2
+class BuildBulbCLI < Thor
 
-# address:port for receiving updates
-address = "0.0.0.0"
-port = ARGV[PORT] ? ARGV[PORT] : 4712
-LOGGER.debug("port is #{port}")
+    option :verbose, :type => :boolean, :default => false
+    option :light, :type => :string, :default => 'BBEBB'
+    option :address, :type => :string, :default => '0.0.0.0'
+    option :port, :type => :numeric, :default => 4712
+    option :projects, :type => :string, :default => 'projects.json'
+    option :test, :type => :boolean, :default => false
+    desc "start", "Listen for status changes of projects and change the color of the light."
+    def start()
 
-# name of the light to control
-light_label = ARGV[NAME] ? ARGV[NAME] : "BBEBB"
-light = BuildBulb::Light.get_light(light_label, debug: DEBUG)
-LOGGER.debug("light is #{light}")
+        logger = Logger.new(STDERR)
+        logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
 
-projects_file_name = ARGV[PROJECTS] ? ARGV[PROJECTS] : "projects.json"
-marshaller = BuildBulb::ProjectsFileMarshaller.new(projects_file_name, LOGGER)
-projects = BuildBulb::Projects.new(projects=marshaller.load, marshaller=marshaller)
+        light = BuildBulb::FakeLight.new(logger, options[:light])
+        if !options[:test]
+            light = BuildBulb::Light.get(options[:light])
+        end
+        
+        marshaller = BuildBulb::ProjectsFileMarshaller.new(logger, options[:projects])
+        projects = BuildBulb::Projects.new(logger, marshaller)
 
-server = BuildBulb::Server.new(address, port, projects, light, LOGGER)
-server.listen_indefinitely()
+        server = BuildBulb::Server.new(logger, options[:address], options[:port], projects, light)
+        server.listen_indefinitely()
+    end
+
+end
+
+BuildBulbCLI.start(ARGV)

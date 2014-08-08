@@ -4,7 +4,7 @@ module BuildBulb
 
         def initialize(id, expected_status, actual_status, last_updated)
             @id = id
-            @expected_status = expected_status ? Status[expected_status] : Status::SUCCESS
+            @expected_status = expected_status ? Status[expected_status] : Status::UNKNOWN
             @actual_status = actual_status ? Status[actual_status] : Status::UNKNOWN
             @last_updated = last_updated ? last_updated : 0
         end
@@ -43,10 +43,11 @@ module BuildBulb
 
     class Projects
 
-        def initialize(projects={}, marshaller=nil)
-            @marshaller = marshaller ? marshaller : Ignore.new
-            #@projects = marshaller ? marshaller.load() : projects
-            @projects = projects
+        def initialize(logger, marshaller)
+            @logger = logger
+            @marshaller = marshaller
+            @projects = @marshaller.load
+            @marshaller.dump(@projects)
         end
 
         def [](key)
@@ -62,10 +63,10 @@ module BuildBulb
             @projects.each do |id, project| 
                 if project.status.precedence < combined_status.precedence
                     combined_status = project.status
-                    LOGGER.info("project \"#{id}\" caused status: \"#{combined_status.name}\".")
+                    @logger.info("project \"#{id}\" caused status: \"#{combined_status.name}\".")
                 end
             end
-            combined_status
+            return combined_status
         end
 
         def update(project, status)
@@ -75,15 +76,31 @@ module BuildBulb
                 raise KeyError, "Project \"#{project}\" not found."
             end
             @projects[project].actual_status = status
+
             @marshaller.dump(@projects)
         end
     end
     
+    class ProjectsMemoryMarshaller
+        def initialize(projects)
+            @projects = projects
+        end
+
+        def load
+            return @projects
+        end
+
+        def dump(projects)
+            # do nothing
+        end
+
+    end
+
     class ProjectsFileMarshaller
     
-        def initialize(filename=nil, logger=nil)
+        def initialize(logger, filename)
+            @logger = logger
             @filename = filename
-            @logger = logger ? logger : Ignore.new
         end
 
         def load
@@ -93,16 +110,15 @@ module BuildBulb
                 return projects
             end
 
-            begin
-                json = JSON.parse(File.read(@filename))
+            json = JSON.parse(File.read(@filename))
+            json.each do |project|
+                id = project["id"]
+                expected_status = project["expected_status"]
+                actual_status = project["actual_status"]
+                last_updated = project["last_updated"]
 
-                json.each do |project|
-                    projects[project["id"]] = Project.new(project["id"], project["expected_status"], project["actual_status"], project["last_updated"])
-                end
-            rescue Exception => e
-                @logger.warn(e.message)
+                projects[id] = Project.new(id, expected_status, actual_status, last_updated)
             end
-
             return projects
         end
 

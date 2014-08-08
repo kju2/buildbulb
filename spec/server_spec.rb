@@ -1,8 +1,6 @@
 require "build-bulb"
 require "logger"
-require "pp"
 require "socket"
-#require "unit_helper"
 
 module BuildBulb
 
@@ -12,7 +10,7 @@ module BuildBulb
     RSpec.describe Server do
         def start_server(address, port, logger)
             Thread.new {
-            server = Server.new(address, port, double("Projects").as_null_object, double("Light").as_null_object, logger)
+            server = Server.new(logger, address, port, double("Projects").as_null_object, double("Light").as_null_object)
             server.listen_indefinitely}
         end
 

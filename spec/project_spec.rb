@@ -66,7 +66,7 @@ module BuildBulb
         describe "#update" do
 
             project = Project.new("existing project", "success", "unknown", 0)
-            projects = Projects.new({project.id => project})
+            projects = Projects.new(Ignore, ProjectsMemoryMarshaller.new({project.id => project}))
 
             it "when the project is nil then raise an exception." do
                 expect{projects.update(nil, "success")}.to raise_error(KeyError, "Project \"\" not found.")
@@ -97,7 +97,7 @@ module BuildBulb
 
     RSpec.describe ProjectsFileMarshaller do
         filename = "projects.json"
-        marshaller = ProjectsFileMarshaller.new(filename=filename)
+        marshaller = ProjectsFileMarshaller.new(Ignore, filename=filename)
 
         it "#dump" do
             project = Project.new("existing project", "success", "unknown", 0)

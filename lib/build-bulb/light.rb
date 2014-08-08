@@ -13,7 +13,8 @@ module BuildBulb
 
     class FakeLight
 
-        def initialize(id)
+        def initialize(logger, id)
+            @logger = logger
             @id = id
             @status = :off
         end
@@ -21,7 +22,7 @@ module BuildBulb
         # Turns the light(s) on synchronously
         # @return [Light, LightCollection] self for chaining
         def turn_on!
-            LOGGER.info("#{@id}: turn on!")
+            @logger.info("#{@id}: turn on!")
             @status = :on
             self
         end
@@ -29,7 +30,7 @@ module BuildBulb
         # Turns the light(s) off synchronously
         # @return [Light, LightCollection]
         def turn_off!
-            LOGGER.info("#{@id}: turn off!")
+            @logger.info("#{@id}: turn off!")
             @status = :off
             self
         end
@@ -57,18 +58,14 @@ module BuildBulb
     end
 
     module Light
-        def self.get_light(id, debug: false)
-            if debug
-                return BuildBulb::FakeLight.new(id)
-            else
-                #LIFX::Config.logger.level = Logger::DEBUG
-                lifx = LIFX::Client.lan
-                lifx.discover! do |c|
-                    c.lights.with_label(id)
-                end
-
-                return lifx.lights.with_label(id)
+        def self.get(id)
+            #LIFX::Config.logger.level = Logger::DEBUG
+            lifx = LIFX::Client.lan
+            lifx.discover! do |c|
+                c.lights.with_label(id)
             end
+
+            return lifx.lights.with_label(id)
         end
     end
 
