@@ -20,7 +20,7 @@ module BuildBulb
             socket = TCPServer.new(@address, @port)
             loop do
                 begin
-                    @light.set_color(@projects.status, duration: 1)
+                    @light.set_color(@projects.status.color, duration: 1)
                     power_light_only_during_office_hours(@light, Time.now, OFFICE_HOURS)
 
                     @logger.debug("Listen to socket for messages...")
