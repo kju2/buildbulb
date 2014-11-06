@@ -8,4 +8,10 @@ Dependencies
 
 - ruby 2.0+
 - [lifx-gem](https://github.com/LIFX/lifx-gem)
+- [thor-gem](https://github.com/erikhuda/thor)
 - [notification-plugin](https://wiki.jenkins-ci.org/display/JENKINS/Notification+Plugin) for Jenkins
+
+Tipps
+=====
+
+On a RaspberryPi you need to install Ruby 2.0+. Here is [How-To](http://www.iconoclastlabs.com/blog/ruby-on-rails-on-the-raspberry-pi-b-with-rbenv).
