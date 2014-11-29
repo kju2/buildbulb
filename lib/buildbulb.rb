@@ -1,6 +1,6 @@
-require 'build-bulb/light'
-require 'build-bulb/project'
-require 'build-bulb/server'
+require 'buildbulb/light'
+require 'buildbulb/project'
+require 'buildbulb/server'
 
 class Ignore < BasicObject
 

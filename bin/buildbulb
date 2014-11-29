@@ -5,7 +5,7 @@ require 'thor'
 
 $LOAD_PATH << File.join(File.dirname(__FILE__), "..", "lib")
 
-require 'build-bulb'
+require 'buildbulb'
 
 class BuildBulbCLI < Thor
 
@@ -15,10 +15,11 @@ class BuildBulbCLI < Thor
     option :port, :type => :numeric, :default => 4712
     option :projects, :type => :string, :default => 'projects.json'
     option :test, :type => :boolean, :default => false
+    option :logfile, :type => :string
     desc "start", "Listen for status changes of projects and change the color of the light."
     def start()
 
-        logger = Logger.new(STDERR)
+        logger = options[:logfile] ? Logger.new(options[:logfile], 'daily') : Logger.new(STDOUT)
         logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
 
         light = BuildBulb::FakeLight.new(logger, options[:light])
