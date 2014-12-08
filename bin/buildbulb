@@ -19,7 +19,7 @@ class BuildBulbCLI < Thor
     desc "start", "Listen for status changes of projects and change the color of the light."
     def start()
 
-        logger = options[:logfile] ? Logger.new(options[:logfile], 'daily') : Logger.new(STDOUT)
+        logger = options[:logfile] ? Logger.new(options[:logfile], 3) : Logger.new(STDOUT)
         logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
 
         light = BuildBulb::FakeLight.new(logger, options[:light])
