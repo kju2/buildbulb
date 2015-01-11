@@ -1,4 +1,4 @@
-require "build-bulb"
+require "buildbulb"
 require "logger"
 require "socket"
 
