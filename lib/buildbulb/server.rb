@@ -8,20 +8,21 @@ module BuildBulb
         TIME_OUT = 600
         OFFICE_HOURS = 6..17
 
-        def initialize(logger, address, port, projects, light)
+        def initialize(logger, address, port, projects, light_locator)
             @logger = logger
             @address = address
             @port = port
             @projects = projects
-            @light = light
+            @light_locator = light_locator
         end
 
         def listen_indefinitely()
             socket = TCPServer.new(@address, @port)
             loop do
                 begin
-                    @light.set_color(@projects.status.color, duration: 1)
-                    power_light_only_during_office_hours(@light, Time.now, OFFICE_HOURS)
+                    light = @light_locator.find_light
+                    light.set_color(@projects.status.color)
+                    power_light_only_during_office_hours(light, Time.now, OFFICE_HOURS)
 
                     @logger.debug("Listen to socket for messages...")
                     readable, _, _ = IO.select([socket], [socket], nil, TIME_OUT)

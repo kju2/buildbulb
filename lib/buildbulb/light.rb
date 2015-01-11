@@ -11,62 +11,69 @@ module BuildBulb
 
     end
 
-    class FakeLight
+    class LightLocator
 
-        def initialize(logger, id)
+        def initialize(logger, label, lifx)
             @logger = logger
-            @id = id
-            @status = :off
+            @label = label
+            @lifx = lifx
         end
 
-        # Turns the light(s) on synchronously
-        # @return [Light, LightCollection] self for chaining
-        def turn_on!
-            @logger.info("#{@id}: turn on!")
-            @status = :on
-            self
-        end
-
-        # Turns the light(s) off synchronously
-        # @return [Light, LightCollection]
-        def turn_off!
-            @logger.info("#{@id}: turn off!")
-            @status = :off
-            self
-        end
-
-        # @see #power
-        # @return [Boolean] Returns true if device is on
-        def on?(refresh: false, fetch: true)
-            @status == :on
-        end
-
-        # @see #power
-        # @return [Boolean] Returns true if device is off
-        def off?(refresh: false, fetch: true)
-            @status == :off
-        end
-
-        # Attempts to set the color of the light(s) to `color` asynchronously.
-        # @param color [Color] The color to be set
-        # @param duration: [Numeric] Transition time in seconds
-        # @return [Light, LightCollection] self for chaining
-        def set_color(color, duration: LIFX::Config.default_duration)
-            self
+        def find_light
+            light = @lifx.lights.with_label(@label)
+            if light.nil?
+                @logger.error("#{@label} wasn't found. Ignoring commands for #{@label}.")
+                LightProxy.new(@logger, @label, Ignore.new)
+            else
+                LightProxy.new(@logger, @label, light)
+            end
         end
 
     end
 
-    module Light
-        def self.get(id)
-            #LIFX::Config.logger.level = Logger::DEBUG
-            lifx = LIFX::Client.lan
-            lifx.discover! do |c|
-                c.lights.with_label(id)
-            end
+    class LightProxy
 
-            return lifx.lights.with_label(id)
+        def initialize(logger, label, light)
+            @logger = logger
+            @label = label
+            @light = light
         end
+
+        # Turns the light on synchronously.
+        # @return Light
+        def turn_on!
+            @logger.debug("#{@label}: turn on!")
+            @light.turn_on!
+            self
+        end
+
+        # Turns the light off synchronously.
+        # @return Light
+        def turn_off!
+            @logger.debug("#{@label}: turn off!")
+            @light.turn_off!
+            self
+        end
+
+        # @return [Boolean] Returns true if device is on.
+        def on?
+            @light.on?
+        end
+
+        # @return [Boolean] Returns true if device is off.
+        def off?
+            @light.off?
+        end
+
+        # Attempts to set the color of the light to `color` asynchronously.
+        # @param color [Color] The color to be set.
+        # @return Light
+        def set_color(color)
+            @logger.debug("#{@label} color is set to #{color}.")
+            @light.set_color(color)
+            self
+        end
+
     end
 
 end

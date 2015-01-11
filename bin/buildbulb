@@ -14,23 +14,25 @@ class BuildBulbCLI < Thor
     option :address, :type => :string, :default => '0.0.0.0'
     option :port, :type => :numeric, :default => 4712
     option :projects, :type => :string, :default => 'projects.json'
-    option :test, :type => :boolean, :default => false
     option :logfile, :type => :string
     desc "start", "Listen for status changes of projects and change the color of the light."
     def start()
 
         logger = options[:logfile] ? Logger.new(options[:logfile], 3) : Logger.new(STDOUT)
-        logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
-
-        light = BuildBulb::FakeLight.new(logger, options[:light])
-        if !options[:test]
-            light = BuildBulb::Light.get(options[:light])
+        logger.level = Logger::INFO
+        if options[:verbose]
+            logger.level = Logger::DEBUG
+            LIFX::Config.logger.level = Logger::DEBUG
         end
+
+        lifx = LIFX::Client.lan
+        lifx.discover
+        light_locator = BuildBulb::LightLocator.new(logger, options[:light], lifx)
         
         marshaller = BuildBulb::ProjectsFileMarshaller.new(logger, options[:projects])
         projects = BuildBulb::Projects.new(logger, marshaller)
 
-        server = BuildBulb::Server.new(logger, options[:address], options[:port], projects, light)
+        server = BuildBulb::Server.new(logger, options[:address], options[:port], projects, light_locator)
         server.listen_indefinitely()
     end
 
