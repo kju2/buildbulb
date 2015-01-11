@@ -9,6 +9,7 @@ Dependencies
 - ruby 2.0+
 - [lifx-gem](https://github.com/LIFX/lifx-gem)
 - [thor-gem](https://github.com/erikhuda/thor)
+- [rspec-gem](http://rspec.info) for testing
 - [notification-plugin](https://wiki.jenkins-ci.org/display/JENKINS/Notification+Plugin) for Jenkins
 
 Tipps
