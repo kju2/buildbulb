@@ -63,8 +63,11 @@ module BuildBulb
             @projects.each do |id, project| 
                 if project.status.precedence < combined_status.precedence
                     combined_status = project.status
-                    @logger.info("project \"#{id}\" caused status: \"#{combined_status.name}\".")
+                    @logger.info("Project \"#{id}\" caused status: \"#{combined_status.name}\".")
                 end
+            end
+            if combined_status == Status::SUCCESS
+                @logger.info("All projects have their expected status.")
             end
             return combined_status
         end
