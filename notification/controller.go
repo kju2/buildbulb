@@ -20,32 +20,32 @@ func NewController() (*Controller, <-chan *project.Project) {
 
 func (c *Controller) Handle(w http.ResponseWriter, r *http.Request) {
 	requestDump, _ := httputil.DumpRequest(r, true)
-	util.Log.Debugf("%s", requestDump)
+	util.Log.Debugf("Received request: %s", requestDump)
 
 	var job job
 	if err := json.NewDecoder(r.Body).Decode(&job); err != nil {
-		badRequest(w, "Error occured parsing request body: '"+err.Error()+"'.")
+		badRequest(w, "Error occured parsing request: '"+err.Error()+"'.")
 		return
 	}
 
 	project, err := job.project()
 	if err != nil {
-		badRequest(w, "Error occured parsing request body: '"+err.Error()+"'.")
+		badRequest(w, "Error occured parsing request: '"+err.Error()+"'.")
 		return
 	}
 
-	if !job.isFinalized() {
-		badRequest(w, "Error occured parsing request body: 'phase not finished'.")
-		return
-	}
-
+	util.Log.Infof(`Decoded job: "%+v"`, *project)
 	c.output <- project
 
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
+	success(w)
 }
 
 func badRequest(w http.ResponseWriter, error string) {
 	util.Log.Info(error)
 	http.Error(w, error, http.StatusBadRequest)
+}
+
+func success(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
 }

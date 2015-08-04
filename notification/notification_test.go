@@ -4,119 +4,84 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/kju2/buildbulb/project"
 )
 
 const notification_template = `{
     "name": "%s",
     "url": "job/#{project}/",
     "build": {
-        "full_url": "http://localhost:8080/job/#{project}/48/",
-        "number": 48,
-        "phase": "FINALIZED",
-        "status": "%s",
-        "url": "job/#{project}/48/",
-        "scm": {
-            "url": "git@github.com:jenkinsci/#{project}.git",
-            "branch": "origin/master",
-            "commit": "4886d1ff4821879410f4f4a93168e6cc179a8eb3"
-        },
-        "artifacts": {
-            "test.jar": [
-                "http://localhost:8080/job/test/48/artifact/target/test.jar"
-            ],
-            "test.hpi": [
-                "http://localhost:8080/job/test/48/artifact/target/test.hpi"
-            ]
-        }
+        "phase": "COMPLETED",
+        "status": "%s"
     }
 }`
 
-func TestDecodingNotification(t *testing.T) {
+func TestDecodingJob(t *testing.T) {
 	projectName := "test_project"
 	status := "Success"
 
-	n, err := decodeMessage(createTestInput(projectName, status))
+	p, err := decodeJob(createTestInput(projectName, status))
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-	log.Printf("HERE: %+v\n", n)
-	//if n.Name != projectName || n.Status != project.Success {
-	//t.FailNow()
-	//}
+
+	if string(p.Name) != projectName || p.Status != project.Success {
+		t.Fatal("Decoded project doesn't have the right values")
+	}
 }
 
+// As a user of this package I want to get an error if a build doesn't have a status.
+func TestDecodingJobWithoutStatus(t *testing.T) {
+	input := strings.NewReader(`{"name": "test", "build": {}}`)
+	_, err := decodeJob(input)
+	if err == nil {
+		t.Fatal("Status is missing, but job could still be parsed.")
+	}
+}
+
+// As a user of this package I want to get an error if a build has an empty status.
+func TestDecodingJobWithEmptyStatus(t *testing.T) {
+	input := strings.NewReader(`{"name": "test", "build": {"status": ""}}`)
+	_, err := decodeJob(input)
+	if err == nil {
+		t.Fatal("Status is empty, but job could still be decoded.")
+	}
+}
+
+// As a user of this package I want to get an error if a build has an invalid status.
+func TestDecodingJobWithAnInvalidStatus(t *testing.T) {
+	input := strings.NewReader(`{"name": "test", "build": {"status": "blub"}}`)
+	_, err := decodeJob(input)
+	if err == nil {
+		t.Fatal("Status is empty, but job could still be decoded.")
+	}
+}
 func TestHttpHandling(t *testing.T) {
 	c, output := NewController()
 
 	response := httptest.NewRecorder()
-	request, err := http.NewRequest("POST", "", createTestInput("BlaProject", "Success"))
+	request, err := http.NewRequest("POST", "", createTestInput("test_project", "Failure"))
 	if err != nil {
 		t.Error(err)
 	}
 
 	c.Handle(response, request)
-	//var n *Notification
-	var p = <-output
-	//log.Printf("Response: %+v\n", response.Code)
-	log.Printf("HERE: %+v\n", p)
+	<-output
 }
 
 func createTestInput(name, status string) io.Reader {
 	return strings.NewReader(fmt.Sprintf(notification_template, name, status))
 }
 
-func decodeMessage(r io.Reader) (*job, error) {
+func decodeJob(r io.Reader) (*project.Project, error) {
 	var j job
 	if err := json.NewDecoder(r).Decode(&j); err != nil {
 		return nil, err
 	}
-	return &j, nil
-}
-
-func TestIfJobIsFinished(t *testing.T) {
-	isFinalized("finished", t)
-	isFinalized("Finished", t)
-	isFinalized("FINISHED", t)
-}
-
-func TestIfJobIsCompleted(t *testing.T) {
-	isFinalized("completed", t)
-	isFinalized("Completed", t)
-	isFinalized("COMPLETED", t)
-}
-
-func TestIfJobIsFinalized(t *testing.T) {
-	isFinalized("finalized", t)
-	isFinalized("Finalized", t)
-	isFinalized("FINALIZED", t)
-}
-
-func TestIfJobIsNotFinalized(t *testing.T) {
-	isNotFinalized("", t)
-	isNotFinalized("bla", t)
-	isNotFinalized("test Completed", t)
-	isNotFinalized(" Completed", t)
-	isNotFinalized("Completed test", t)
-}
-func isFinalized(phase string, t *testing.T) {
-	j := &job{}
-	j.Build.Phase = phase
-
-	if !j.isFinalized() {
-		t.Fatalf("Job phase '%v' should be finalized, but isn't", phase)
-	}
-}
-
-func isNotFinalized(phase string, t *testing.T) {
-	j := &job{}
-	j.Build.Phase = phase
-
-	if j.isFinalized() {
-		t.Fatalf("Job phase '%v' should be finalized, but isn't", phase)
-	}
+	return j.project()
 }
