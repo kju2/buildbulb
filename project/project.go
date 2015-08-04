@@ -2,8 +2,9 @@ package project
 
 import (
 	"fmt"
-	"log"
 	"strings"
+
+	"github.com/kju2/buildbulb/util"
 )
 
 type Project struct {
@@ -26,6 +27,19 @@ const (
 	Unstable
 	Success
 )
+
+func (s Status) String() string {
+	switch s {
+	case Failure:
+		return "Failure"
+	case Unstable:
+		return "Unstable"
+	case Success:
+		return "Success"
+	default:
+		return "Unknown"
+	}
+}
 
 func Parse(status string) (Status, error) {
 	if len(status) < 1 {
@@ -56,13 +70,22 @@ func NewController(input <-chan *Project) (*Controller, <-chan Status) {
 
 func (c *Controller) run(input <-chan *Project) {
 	for notification := range input {
-		log.Printf("Notification: %+v\n", notification)
+		newStatus := notification.Status
+		oldStatus, _ := c.projects[notification.Name]
+		util.Log.Infof("Updating project %q from %q to %q", notification.Name, oldStatus, newStatus)
 
 		c.projects[notification.Name] = notification.Status
-		log.Printf("Projects: %+v\n", c.projects)
+		util.Log.Debugf("Projects: %+v", c.projects)
 
 		overallStatus := Success
-		for _, status := range c.projects {
+		for project, status := range c.projects {
+			switch status {
+			case Failure:
+				util.Log.Errorf("Project %q failed.", project)
+			case Unstable:
+				util.Log.Warnf("Project %q is unstable.", project)
+			}
+
 			if status < overallStatus {
 				overallStatus = status
 			}

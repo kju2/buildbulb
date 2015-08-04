@@ -8,5 +8,5 @@ var (
 
 func init() {
 	Log = log.New()
-	Log.Level=log.DebugLevel
+	Log.Level = log.InfoLevel
 }
