@@ -23,9 +23,9 @@ type Name string
 type Status int
 
 const (
-	Failure Status = iota
-	Unstable
-	Success
+	Failure  Status = iota // Project couldn't be compiled or another unrecoverable error occurred.
+	Unstable               // At least one test for this project failed.
+	Success                // Project compiled and all tests are green.
 )
 
 func (s Status) String() string {
@@ -70,6 +70,7 @@ func NewController(input <-chan *Project) (*Controller, <-chan Status) {
 
 func (c *Controller) run(input <-chan *Project) {
 	for notification := range input {
+		// Update project status.
 		newStatus := notification.Status
 		oldStatus, _ := c.projects[notification.Name]
 		util.Log.Infof("Updating project %q from %q to %q", notification.Name, oldStatus, newStatus)
@@ -77,6 +78,7 @@ func (c *Controller) run(input <-chan *Project) {
 		c.projects[notification.Name] = notification.Status
 		util.Log.Debugf("Projects: %+v", c.projects)
 
+		// Determine overall project status.
 		overallStatus := Success
 		for project, status := range c.projects {
 			switch status {
@@ -90,6 +92,11 @@ func (c *Controller) run(input <-chan *Project) {
 				overallStatus = status
 			}
 		}
+
+		// Send overall status to the receiver.
 		c.output <- overallStatus
+
+		// Persist state of projects.
+		// TODO
 	}
 }
