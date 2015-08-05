@@ -9,4 +9,8 @@ var (
 func init() {
 	Log = log.New()
 	Log.Level = log.InfoLevel
+
+	formatter := new(log.TextFormatter)
+	formatter.FullTimestamp = true
+	Log.Formatter = formatter
 }
