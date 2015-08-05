@@ -3,10 +3,10 @@ package notification
 import (
 	"fmt"
 
-	"github.com/kju2/buildbulb/project"
+	"github.com/kju2/buildbulb/job"
 )
 
-type job struct {
+type notification struct {
 	Name  string
 	Build build
 }
@@ -15,16 +15,15 @@ type build struct {
 	Status string
 }
 
-func (j *job) project() (*project.Project, error) {
-	if len(j.Name) < 1 {
-		return nil, fmt.Errorf("Project name is missing.")
+func (msg *notification) job() (*job.Job, error) {
+	if len(msg.Name) < 1 {
+		return nil, fmt.Errorf("Job name is missing.")
 	}
-	name := project.Name(j.Name)
 
-	status, err := project.Parse(j.Build.Status)
+	status, err := job.Parse(msg.Build.Status)
 	if err != nil {
 		return nil, err
 	}
 
-	return project.NewProject(name, status), nil
+	return job.NewJob(msg.Name, status), nil
 }

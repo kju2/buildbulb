@@ -5,16 +5,16 @@ import (
 	"net/http"
 	"net/http/httputil"
 
-	"github.com/kju2/buildbulb/project"
+	"github.com/kju2/buildbulb/job"
 	"github.com/kju2/buildbulb/util"
 )
 
 type Controller struct {
-	output chan<- *project.Project
+	output chan<- *job.Job
 }
 
-func NewController() (*Controller, <-chan *project.Project) {
-	output := make(chan *project.Project, 1)
+func NewController() (*Controller, <-chan *job.Job) {
+	output := make(chan *job.Job, 1)
 	return &Controller{output}, output
 }
 
@@ -22,20 +22,20 @@ func (c *Controller) Handle(w http.ResponseWriter, r *http.Request) {
 	requestDump, _ := httputil.DumpRequest(r, true)
 	util.Log.Debugf("Received request: %s", requestDump)
 
-	var job job
-	if err := json.NewDecoder(r.Body).Decode(&job); err != nil {
+	var msg notification
+	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
 		badRequest(w, "Error occured parsing request: '"+err.Error()+"'.")
 		return
 	}
 
-	project, err := job.project()
+	job, err := msg.job()
 	if err != nil {
 		badRequest(w, "Error occured parsing request: '"+err.Error()+"'.")
 		return
 	}
 
-	util.Log.Infof(`Decoded job: "%+v"`, *project)
-	c.output <- project
+	util.Log.WithField("job", *job).Info("Decoded job.")
+	c.output <- job
 
 	success(w)
 }

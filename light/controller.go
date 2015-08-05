@@ -3,14 +3,14 @@ package light
 import (
 	"time"
 
-	"github.com/kju2/buildbulb/project"
+	"github.com/kju2/buildbulb/job"
 )
 
 type Controller struct {
 	light *light
 }
 
-func NewController(input <-chan project.Status) (*Controller, error) {
+func NewController(input <-chan job.Status) (*Controller, error) {
 	light, err := newLight()
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func NewController(input <-chan project.Status) (*Controller, error) {
 	return c, nil
 }
 
-func (c *Controller) run(input <-chan project.Status) {
+func (c *Controller) run(input <-chan job.Status) {
 	timer := time.Tick(1 * time.Minute)
 
 	color := Red
@@ -39,14 +39,14 @@ func (c *Controller) run(input <-chan project.Status) {
 	}
 }
 
-func (c *Controller) colorFor(status project.Status) Color {
+func (c *Controller) colorFor(status job.Status) Color {
 	color := Red
 	switch status {
-	case project.Failure:
+	case job.Failure:
 		color = Red
-	case project.Unstable:
+	case job.Unstable:
 		color = Yellow
-	case project.Success:
+	case job.Success:
 		color = Green
 	}
 	return color
@@ -54,9 +54,9 @@ func (c *Controller) colorFor(status project.Status) Color {
 
 func (c *Controller) turnLightOnIfWorkingHours(t time.Time) bool {
 	weekday := t.Weekday()
-	if time.Sunday < weekday { //}&& weekday < time.Saturday {
+	if time.Sunday < weekday && weekday < time.Saturday {
 		hour := t.Hour()
-		workStart := 6
+		workStart := 6 //TODO check
 		workEnd := 18
 		if workStart <= hour && hour <= workEnd {
 			return true

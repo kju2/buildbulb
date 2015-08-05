@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kju2/buildbulb/project"
+	"github.com/kju2/buildbulb/job"
 )
 
 const notification_template = `{
@@ -25,13 +25,9 @@ func TestDecodingJob(t *testing.T) {
 	projectName := "test_project"
 	status := "Success"
 
-	p, err := decodeJob(createTestInput(projectName, status))
+	_, err := decodeJob(createTestInput(projectName, status))
 	if err != nil {
 		t.Fatal(err)
-	}
-
-	if string(p.Name) != projectName || p.Status != project.Success {
-		t.Fatal("Decoded project doesn't have the right values")
 	}
 }
 
@@ -39,6 +35,7 @@ func TestDecodingJob(t *testing.T) {
 func TestDecodingJobWithoutStatus(t *testing.T) {
 	input := strings.NewReader(`{"name": "test", "build": {}}`)
 	_, err := decodeJob(input)
+	t.Log(err)
 	if err == nil {
 		t.Fatal("Status is missing, but job could still be parsed.")
 	}
@@ -78,10 +75,10 @@ func createTestInput(name, status string) io.Reader {
 	return strings.NewReader(fmt.Sprintf(notification_template, name, status))
 }
 
-func decodeJob(r io.Reader) (*project.Project, error) {
-	var j job
-	if err := json.NewDecoder(r).Decode(&j); err != nil {
+func decodeJob(r io.Reader) (*job.Job, error) {
+	var msg notification
+	if err := json.NewDecoder(r).Decode(&msg); err != nil {
 		return nil, err
 	}
-	return j.project()
+	return msg.job()
 }

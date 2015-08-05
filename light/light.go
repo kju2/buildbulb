@@ -8,7 +8,7 @@ import (
 	"github.com/pdf/golifx/protocol"
 )
 
-// Color is given in the degrees of a circle. (See http://www.workwithcolor.com/hsl-color-picker-01.htm)
+// Color is given in the degrees of a circle (see http://www.workwithcolor.com/hsl-color-picker-01.htm).
 type Color uint16
 
 const (
