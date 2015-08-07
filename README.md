@@ -1,4 +1,4 @@
-#BUILDBULB
+#buildbulb
 
 A server application to turn a LIFX light bulb into an extreme feedback device for multiple Jenkins projects.
 
