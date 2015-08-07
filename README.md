@@ -16,7 +16,7 @@ The buildbulb command will be available at ${GOPATH}/bin/.
 ./buildbulb 
 ```
 
-Commandline parameters to configure the application are work in progress.
+Command line parameters to configure the application are work in progress.
 
 ##Dependencies
 
