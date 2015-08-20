@@ -35,6 +35,7 @@ func newLight() (*light, error) {
 	if err != nil {
 		return nil, err
 	}
+	client.SetDiscoveryInterval(5 * time.Minute)
 
 	return &light{client}, nil
 }
