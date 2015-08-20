@@ -1,9 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/kju2/buildbulb/job"
 	"github.com/kju2/buildbulb/light"
@@ -11,12 +13,16 @@ import (
 	"github.com/kju2/buildbulb/util"
 )
 
-// TODO As a server administrator I want to configure the server with cmd arguments.
+var (
+	port         = flag.Int("port", 8080, "port to listen for incoming HTTP requests")
+	jobsFilePath = flag.String("jobsFilePath", "/tmp/buildbulb", "path to load and persist jobs")
+)
 
 func main() {
-	port := "8080"
+	flag.Parse()
+
 	notifier, notifications := notification.NewController()
-	_, status := job.NewController(notifications)
+	_, status := job.NewController(notifications, *jobsFilePath)
 	_, err := light.NewController(status)
 
 	if err != nil {
@@ -26,7 +32,7 @@ func main() {
 	util.Log.WithField("port", port).Info("Will listen forever for HTTP requests.")
 	http.HandleFunc("/ping", pong)
 	http.HandleFunc("/notify", notifier.Handle)
-	http.ListenAndServe(":"+port, nil)
+	http.ListenAndServe(":"+strconv.Itoa(*port), nil)
 }
 
 func pong(w http.ResponseWriter, r *http.Request) {
