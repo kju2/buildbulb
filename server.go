@@ -15,7 +15,7 @@ import (
 
 var (
 	port         = flag.Int("port", 8080, "port to listen for incoming HTTP requests")
-	jobsFilePath = flag.String("jobsFilePath", "/tmp/buildbulb", "path to load and persist jobs")
+	jobsFilePath = flag.String("jobsFilePath", "~/.buildbulb", "path to load and persist jobs")
 )
 
 func main() {
