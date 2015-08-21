@@ -56,7 +56,7 @@ func (c *Controller) turnLightOnIfWorkingHours(t time.Time) bool {
 	weekday := t.Weekday()
 	if time.Sunday < weekday && weekday < time.Saturday {
 		hour := t.Hour()
-		workStart := 6 //TODO check
+		workStart := 6
 		workEnd := 18
 		if workStart <= hour && hour <= workEnd {
 			return true
