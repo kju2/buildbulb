@@ -29,7 +29,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	util.Log.WithField("port", port).Info("Will listen forever for HTTP requests.")
+	util.Log.WithField("port", *port).Info("Will listen forever for HTTP requests.")
 	http.HandleFunc("/ping", pong)
 	http.HandleFunc("/notify", notifier.Handle)
 	http.ListenAndServe(":"+strconv.Itoa(*port), nil)
