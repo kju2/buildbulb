@@ -22,6 +22,7 @@ const (
 
 type light struct {
 	client *golifx.Client
+	device common.Light
 }
 
 func newLight() (*light, error) {
@@ -37,7 +38,11 @@ func newLight() (*light, error) {
 	}
 	client.SetDiscoveryInterval(5 * time.Minute)
 
-	return &light{client}, nil
+	device, err := client.GetLightByLabel("BuildBulb")
+	if err != nil {
+		return nil, err
+	}
+	return &light{client, device}, nil
 }
 
 func (l *light) setColor(c Color) {
@@ -47,10 +52,12 @@ func (l *light) setColor(c Color) {
 		Brightness: 26214,
 		Kelvin:     2500,
 	}
+	l.device.SetColor(color, 1*time.Second)
 	l.client.SetColor(color, 1*time.Second)
 }
 
 func (l *light) setPower(p bool) {
+	l.device.SetPower(p)
 	l.client.SetPower(p)
 }
 
