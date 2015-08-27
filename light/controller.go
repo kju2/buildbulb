@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/kju2/buildbulb/job"
+	"github.com/kju2/buildbulb/util"
 )
 
 type Controller struct {
@@ -31,8 +32,10 @@ func (c *Controller) run(input <-chan job.Status) {
 		select {
 		case status := <-input:
 			color = c.colorFor(status)
+			util.Log.WithField("color", color).Debug("setColor")
 		case time := <-timer:
 			power = c.turnLightOnIfWorkingHours(time)
+			util.Log.WithField("power", power).Debug("setPower")
 		}
 		c.light.setColor(color)
 		c.light.setPower(power)
