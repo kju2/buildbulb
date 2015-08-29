@@ -15,14 +15,18 @@ import (
 
 var (
 	port         = flag.Int("port", 8080, "port to listen for incoming HTTP requests")
-	jobsFilePath = flag.String("jobsFilePath", "~/.buildbulb", "path to load and persist jobs")
+	jobsFilePath = flag.String("jobsFilePath", "", "path to load and persist jobs")
 )
 
 func main() {
 	flag.Parse()
 
+	if len(*jobsFilePath) == 0 {
+		util.Log.Warn("Path to load and persist jobs hasn't been provided.")
+	}
+
 	notifier, notifications := notification.NewController()
-	_, status := job.NewController(notifications, *jobsFilePath)
+	jobifier, status := job.NewController(notifications, *jobsFilePath)
 	_, err := light.NewController(status)
 
 	if err != nil {
@@ -31,6 +35,7 @@ func main() {
 
 	util.Log.WithField("port", *port).Info("Will listen forever for HTTP requests.")
 	http.HandleFunc("/ping", pong)
+	http.HandleFunc("/jobs", jobifier.Handle)
 	http.HandleFunc("/notify", notifier.Handle)
 	http.ListenAndServe(":"+strconv.Itoa(*port), nil)
 }

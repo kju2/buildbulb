@@ -1,17 +1,20 @@
 package job
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 )
 
 type Job struct {
-	Name   string
-	Status Status
+	Name        string
+	Status      Status
+	LastUpdated time.Time
 }
 
-func NewJob(name string, status Status) *Job {
-	return &Job{name, status}
+func NewJob(name string, status Status, lastUpdated time.Time) *Job {
+	return &Job{name, status, lastUpdated}
 }
 
 // The build status of a job.
@@ -22,6 +25,16 @@ const (
 	Unstable               // At least one test for this job failed.
 	Success                // Job compiled and all tests are green.
 )
+
+func (s Status) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.String())
+}
+
+func (s Status) UnmarshalJSON(b []byte) error {
+	var err error = nil
+	s, err = Parse(string(b))
+	return err
+}
 
 func (s Status) String() string {
 	switch s {

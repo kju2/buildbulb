@@ -2,6 +2,7 @@ package notification
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/kju2/buildbulb/job"
 )
@@ -25,5 +26,5 @@ func (msg *notification) job() (*job.Job, error) {
 		return nil, err
 	}
 
-	return job.NewJob(msg.Name, status), nil
+	return job.NewJob(msg.Name, status, time.Now().Round(time.Second)), nil
 }
