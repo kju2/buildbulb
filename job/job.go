@@ -30,9 +30,9 @@ func (s Status) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.String())
 }
 
-func (s Status) UnmarshalJSON(b []byte) error {
+func (s *Status) UnmarshalJSON(b []byte) error {
 	var err error = nil
-	s, err = Parse(string(b))
+	*s, err = Parse(string(b))
 	return err
 }
 
@@ -54,9 +54,13 @@ func Parse(status string) (Status, error) {
 		return Failure, fmt.Errorf("Given status is empty.")
 	}
 
-	got, ok := map[string]Status{"failure": Failure, "unstable": Unstable, "success": Success}[strings.ToLower(status)]
+	// If the source of the received status is the JSON document, it contains quotation marks which have to be removed.
+	parsedStatus := strings.ToLower(strings.Replace(status, "\"", "", 2))
+	
+	got, ok := map[string]Status{"failure": Failure, "unstable": Unstable, "success": Success}[parsedStatus]
 	if !ok {
 		return Failure, fmt.Errorf("Given status %q is invalid.", status)
 	}
+
 	return got, nil
 }
