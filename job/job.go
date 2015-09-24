@@ -26,6 +26,10 @@ const (
 	Success                // Job compiled and all tests are green.
 )
 
+func (job Job) String() string {
+	return fmt.Sprintf("[%s:%s]", job.Name, job.Status);
+}
+
 func (s Status) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.String())
 }
