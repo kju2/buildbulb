@@ -16,7 +16,6 @@ func NewController(input <-chan job.Status) (*Controller, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	c := &Controller{light}
 	go c.run(input)
 
@@ -25,9 +24,9 @@ func NewController(input <-chan job.Status) (*Controller, error) {
 
 func (c *Controller) run(input <-chan job.Status) {
 	timer := time.Tick(1 * time.Minute)
-
 	color := Red
 	power := true
+
 	for {
 		select {
 		case status := <-input:
