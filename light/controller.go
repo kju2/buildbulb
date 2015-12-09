@@ -16,6 +16,7 @@ func NewController(input <-chan job.Status) (*Controller, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	c := &Controller{light}
 	go c.run(input)
 
@@ -27,11 +28,7 @@ func (c *Controller) run(input <-chan job.Status) {
 
 	color := Red
 	power := true
-
 	for {
-		
-		util.Log.Warn("in mysterious loop")
-	
 		select {
 		case status := <-input:
 			color = c.colorFor(status)
