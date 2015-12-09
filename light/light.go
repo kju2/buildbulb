@@ -3,6 +3,7 @@ package light
 import (
 	"time"
 
+	"github.com/kju2/buildbulb/util"
 	"github.com/pdf/golifx"
 	"github.com/pdf/golifx/common"
 	"github.com/pdf/golifx/protocol"
@@ -40,6 +41,7 @@ func newLight() (*light, error) {
 
 	device, err := client.GetLightByLabel("BuildBulb")
 	if err != nil {
+		util.Log.Error("Could not find any lamp with label 'BuildBulb'.")
 		return nil, err
 	}
 	return &light{client, device}, nil
