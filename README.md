@@ -2,6 +2,8 @@
 
 A server application to turn a LIFX light bulb into an extreme feedback device for multiple Jenkins projects.
 
+**Note:** Your LIFX light bulb must have the label _BuildBulb_ for this script to work.
+
 ## Install
 
 ```shell
