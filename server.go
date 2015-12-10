@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -30,7 +29,7 @@ func main() {
 	_, err := light.NewController(status)
 
 	if err != nil {
-		log.Fatal(err)
+		util.Log.WithField("error", err).Fatal("Light controller threw an error on initialization.")
 	}
 
 	util.Log.WithField("port", *port).Info("Will listen forever for HTTP requests.")
