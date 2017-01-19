@@ -15,8 +15,13 @@ The buildbulb command will be available at ${GOPATH}/bin/.
 ## Usage
 
 ```shell
-./buildbulb --port=8080 --jobsFilePath=/path/to/load/and/persist/jobs
+./buildbulb --bulbName=BuildBulb --port=8080 --jobsFilePath=/path/to/load/and/persist/jobs
 ```
+
+All parameters are optional:
+- Default bulbName: BuildBulb
+- Default port: 8080
+- If jobsFilePath isn't set, the job status is lost when the program closes.
 
 Command line parameters to configure the application are work in progress.
 

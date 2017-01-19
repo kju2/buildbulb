@@ -26,7 +26,7 @@ type light struct {
 	device common.Light
 }
 
-func newLight() (*light, error) {
+func newLight(bulbName string) (*light, error) {
 	// Get debug output for LIFX device
 	//logger := logrus.New()
 	//logger.Out = os.Stderr
@@ -39,9 +39,9 @@ func newLight() (*light, error) {
 	}
 	client.SetDiscoveryInterval(5 * time.Minute)
 
-	device, err := client.GetLightByLabel("BuildBulb")
+	device, err := client.GetLightByLabel(bulbName)
 	if err != nil {
-		util.Log.Error("Could not find any lamp with label 'BuildBulb'")
+		util.Log.Error("Could not find any lamp with label '" + bulbName + "'")
 		return nil, err
 	}
 	return &light{client, device}, nil
