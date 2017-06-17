@@ -11,8 +11,8 @@ type Controller struct {
 	light *light
 }
 
-func NewController(input <-chan job.Status) (*Controller, error) {
-	light, err := newLight()
+func NewController(input <-chan job.Status, bulbName string) (*Controller, error) {
+	light, err := newLight(bulbName)
 	if err != nil {
 		return nil, err
 	}

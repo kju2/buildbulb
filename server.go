@@ -15,6 +15,7 @@ import (
 var (
 	port         = flag.Int("port", 8080, "port to listen for incoming HTTP requests")
 	jobsFilePath = flag.String("jobsFilePath", "", "path to load and persist jobs")
+	bulbName     = flag.String("bulbName", "", "name of the LiFX bulb to control")
 )
 
 func main() {
@@ -26,7 +27,7 @@ func main() {
 
 	notifier, notifications := notification.NewController()
 	jobifier, status := job.NewController(notifications, *jobsFilePath)
-	_, err := light.NewController(status)
+	_, err := light.NewController(status, *bulbName)
 
 	if err != nil {
 		util.Log.WithField("error", err).Fatal("Light controller threw an error on initialization.")
