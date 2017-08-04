@@ -1,8 +1,6 @@
-#buildbulb
+# buildbulb
 
 A server application to turn a LIFX light bulb into an extreme feedback device for multiple Jenkins projects.
-
-**Note:** Your LIFX light bulb must have the label _BuildBulb_ for this script to work.
 
 ## Install
 
@@ -15,15 +13,14 @@ The buildbulb command will be available at ${GOPATH}/bin/.
 ## Usage
 
 ```shell
-./buildbulb --bulbName=BuildBulb --port=8080 --jobsFilePath=/path/to/load/and/persist/jobs
+./buildbulb --bulbName=BuildBulb --port=8080 --jobsFilePath=/path/to/load/and/persist/jobs --apiKey=<your-lifx-api-key>
 ```
 
 All parameters are optional:
 - Default bulbName: BuildBulb
 - Default port: 8080
 - If jobsFilePath isn't set, the job status is lost when the program closes.
-
-Command line parameters to configure the application are work in progress.
+- if you provide no LIFX API key, the application will try to find your lamp in the local network - otherwise the LIFX cloud services are used for controlling the light.
 
 ## Jenkins Setup
 
