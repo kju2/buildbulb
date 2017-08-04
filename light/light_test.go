@@ -10,7 +10,7 @@ const (
 )
 
 func TestLight(t *testing.T) {
-	l, err := newLight("BuildBulb")
+	l, err := newLight("BuildBulb", "")
 	if err != nil {
 		t.Error(err)
 	}
