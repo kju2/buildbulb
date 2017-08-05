@@ -8,11 +8,11 @@ import (
 )
 
 type Controller struct {
-	light *light
+	light bulb
 }
 
-func NewController(input <-chan job.Status, bulbName string) (*Controller, error) {
-	light, err := newLight(bulbName)
+func NewController(input <-chan job.Status, bulbName string, apiKey string) (*Controller, error) {
+	light, err := newLight(bulbName, apiKey)
 	if err != nil {
 		return nil, err
 	}
