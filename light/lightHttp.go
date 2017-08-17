@@ -91,7 +91,8 @@ func (l *lightHttp) update() {
 	req, _ := http.NewRequest("PUT", url, b)
 	req.Header.Set("Authorization", "Bearer " + l.apiKey)
 	req.Header.Set("Content-Type", "application/json")
-	_, err := http.DefaultClient.Do(req)
+        resp, err := http.DefaultClient.Do(req)
+        defer resp.Body.Close()
 	if err != nil {
 		util.Log.Error("Could not update light! ", err)
 	}
