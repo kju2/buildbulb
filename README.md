@@ -32,7 +32,7 @@ All parameters are optional:
   - URL: http://serverip:port/notify
 - Build the job.
 
-##Dependencies
+## Dependencies
 
 - Go 1.4.+
 - LIFX bulb (http://www.lifx.com/)
